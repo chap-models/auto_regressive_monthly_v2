@@ -18,6 +18,8 @@ entry_points:
       out_file: str
     command: "python predict.py {model} {historic_data} {future_data} {out_file}"
 supported_period_type: 'month'
+min_prediction_length: 1
+max_prediction_length: 3
 meta_data:
   display_name: 'Monthly Deep Auto Regressive'
   description: "An experimental deep learning model based on an RNN architecture, focusing on predictions based on auto-regressive time series data."
