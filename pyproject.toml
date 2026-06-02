@@ -2,10 +2,11 @@
 name = "auto_regressive_monthly"
 version = "1.0.0"
 description = "Monthly Deep Auto Regressive CHAP model (RNN architecture, flax/jax)"
+license = { text = "AGPLv3 license" }
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "chap-core @ git+https://github.com/dhis2-chap/chap-core.git@master",
     "chap_ar @ git+https://github.com/mortenoh/chap_ar.git@main",
+    "pandas>=2.1",
 ]
 
 [dependency-groups]
@@ -14,6 +15,9 @@ dev = [
     "mypy>=1.18",
     "pyright>=1.1.400",
     "pytest>=8.0",
+    # test-only: provides the `chap` CLI for the chap eval integration test.
+    # NOT a runtime dependency — train.py/predict.py never import chap_core.
+    "chap-core @ git+https://github.com/dhis2-chap/chap-core.git@master",
 ]
 
 # ==============================================================================
@@ -52,7 +56,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.pyright]
-include = ["main.py", "tests"]
+include = ["train.py", "predict.py", "model.py", "tests"]
 exclude = ["**/.venv"]
 pythonVersion = "3.13"
 typeCheckingMode = "basic"

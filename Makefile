@@ -21,7 +21,7 @@ lint:
 	@$(UV) run ruff format .
 	@$(UV) run ruff check . --fix
 	@echo ">>> Type checking"
-	@$(UV) run mypy main.py tests
+	@$(UV) run mypy train.py predict.py model.py tests
 	@$(UV) run pyright
 
 check:
@@ -29,7 +29,7 @@ check:
 	@$(UV) run ruff format --check .
 	@$(UV) run ruff check .
 	@echo ">>> Type checking"
-	@$(UV) run mypy main.py tests
+	@$(UV) run mypy train.py predict.py model.py tests
 	@$(UV) run pyright
 
 test:

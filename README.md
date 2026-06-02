@@ -6,8 +6,8 @@ time series data and climate covariates.
 
 It wraps `AutoRegressiveModel` from
 [`chap_ar`](https://github.com/mortenoh/chap_ar) and exposes the standard CHAP
-`train` / `predict` command-line interface via
-`chap_core.adaptors.command_line_interface.generate_app`.
+`train` / `predict` commands via small `train.py` / `predict.py` scripts that read
+and write CSV with pandas. The model has no chap-core dependency at runtime.
 
 ## Configuration
 
@@ -24,13 +24,12 @@ It wraps `AutoRegressiveModel` from
 
 This model uses [uv](https://docs.astral.sh/uv/) and Python 3.13. The pinned
 environment lives in `pyproject.toml` / `uv.lock`. CHAP runs the model through
-its uv runner (`uv run python main.py ...`); the committed lock file makes
+its uv runner (`uv run python train.py …` / `predict.py …`); the committed lock file makes
 environment creation deterministic and fast.
 
 Key pins:
 
 - Python 3.13
-- `chap-core` @ git `master` (dhis2-chap/chap-core)
 - `chap_ar` @ git (mortenoh/chap_ar) — the deep AR flax model, providing `AutoRegressiveModel`
 - `flax 0.12`, `jax 0.10` (resolved transitively via `chap_ar`)
 
@@ -49,8 +48,8 @@ make lint      # ruff format + autofix, then type-check
 make test      # run the model through the chap CLI on bundled input data
 ```
 
-`make test` requires the `chap` CLI (provided by chap-core, a dependency of this
-model) and fails clearly if it is missing. It runs a small backtest via
+`make test` requires the `chap` CLI (provided by chap-core, a **dev/test-only**
+dependency — not a runtime dependency) and fails clearly if it is missing. It runs a small backtest via
 `chap eval` against `input/trainData.csv` and asserts the forecasts are finite.
 
 ## Local use
@@ -59,10 +58,10 @@ model) and fails clearly if it is missing. It runs a small backtest via
 uv sync
 
 # train
-uv run python main.py train <training_data.csv> <model_output_path>
+uv run python train.py <training_data.csv> <model_output_path>
 
 # predict
-uv run python main.py predict <model_path> <historic_data.csv> <future_data.csv> <out_file.csv>
+uv run python predict.py <model_path> <historic_data.csv> <future_data.csv> <out_file.csv>
 ```
 
 ## Evaluating through CHAP

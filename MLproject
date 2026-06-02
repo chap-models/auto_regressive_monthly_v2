@@ -9,14 +9,14 @@ entry_points:
     parameters:
       train_data: str
       model: str
-    command: "python main.py train {train_data} {model}"
+    command: "python train.py {train_data} {model}"
   predict:
     parameters:
       model: str
       historic_data: str
       future_data: str
       out_file: str
-    command: "python main.py predict {model} {historic_data} {future_data} {out_file}"
+    command: "python predict.py {model} {historic_data} {future_data} {out_file}"
 supported_period_type: 'month'
 meta_data:
   display_name: 'Monthly Deep Auto Regressive'
