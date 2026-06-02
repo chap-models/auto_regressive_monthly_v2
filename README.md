@@ -5,8 +5,8 @@ based on an RNN architecture that forecasts disease cases from auto-regressive
 time series data and climate covariates.
 
 It wraps `ARModelTV1` from
-[`ch_modelling`](https://github.com/knutdrand/ch_modelling) and exposes the
-standard CHAP `train` / `predict` command-line interface via
+[`chap_ar`](https://github.com/mortenoh/chap_ar) and exposes the standard CHAP
+`train` / `predict` command-line interface via
 `chap_core.adaptors.command_line_interface.generate_app`.
 
 ## Configuration
