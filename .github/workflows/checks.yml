@@ -21,3 +21,9 @@ jobs:
 
       - name: Run checks (ruff + mypy + pyright)
         run: make check
+
+      - name: Run tests (self-contained train/predict)
+        run: make test
+
+      - name: chap eval integration (chap CLI via uvx, no chap-core dependency)
+        run: make eval

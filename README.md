@@ -45,12 +45,18 @@ for production forecasts.
 make install   # uv sync
 make check     # ruff (format + lint) + mypy + pyright, no changes
 make lint      # ruff format + autofix, then type-check
-make test      # run the model through the chap CLI on bundled input data
+make test      # self-contained train/predict pipeline test
+make eval      # chap eval backtest (chap CLI via uvx; no chap-core dependency)
 ```
 
-`make test` requires the `chap` CLI (provided by chap-core, a **dev/test-only**
-dependency — not a runtime dependency) and fails clearly if it is missing. It runs a small backtest via
-`chap eval` against `input/trainData.csv` and asserts the forecasts are finite.
+This model has **no chap-core dependency**. Testing is split in two:
+
+- `make test` is **self-contained** — it drives `train.py` / `predict.py` on the
+  bundled `input/` data and verifies the prediction CSV (columns, finiteness, row
+  count). No chap-core involved.
+- `make eval` runs a real `chap eval` backtest, then reads back the output NetCDF
+  and asserts the forecasts are finite. It gets the `chap` CLI on demand with
+  `uvx --from chap-core` — chap-core is never added to the project. CI runs both.
 
 ## Local use
 

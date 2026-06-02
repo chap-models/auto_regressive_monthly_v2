@@ -15,9 +15,6 @@ dev = [
     "mypy>=1.18",
     "pyright>=1.1.400",
     "pytest>=8.0",
-    # test-only: provides the `chap` CLI for the chap eval integration test.
-    # NOT a runtime dependency — train.py/predict.py never import chap_core.
-    "chap-core @ git+https://github.com/dhis2-chap/chap-core.git@master",
 ]
 
 # ==============================================================================
@@ -54,6 +51,9 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.pyright]
 include = ["train.py", "predict.py", "model.py", "tests"]
