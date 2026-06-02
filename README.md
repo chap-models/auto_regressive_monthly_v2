@@ -64,11 +64,12 @@ uv run python main.py predict <model_path> <historic_data.csv> <future_data.csv>
 
 ## Evaluating through CHAP
 
-From a chap-core checkout:
+`--model-name` can point straight at the GitHub repo; CHAP clones and runs it.
+From a chap-core checkout (for the example dataset):
 
 ```bash
 uv run chap eval \
-    --model-name /path/to/auto_regressive_monthly \
+    --model-name https://github.com/mortenoh/auto_regressive_monthly \
     --dataset-csv example_data/laos_subset.csv \
     --output-file /tmp/chap/ar_eval.nc \
     --backtest-params.n-splits 2 \
