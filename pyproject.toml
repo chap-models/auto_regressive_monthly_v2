@@ -1,0 +1,62 @@
+[project]
+name = "auto_regressive_monthly"
+version = "1.0.0"
+description = "Monthly Deep Auto Regressive CHAP model (RNN architecture, flax/jax)"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "chap-core @ git+https://github.com/dhis2-chap/chap-core.git@master",
+    "chap_ar @ git+https://github.com/mortenoh/chap_ar.git@main",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15",
+    "mypy>=1.18",
+    "pyright>=1.1.400",
+    "pytest>=8.0",
+]
+
+# ==============================================================================
+# Linting / typing config (derived from chapkit)
+# ==============================================================================
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "W", "F", "I", "D"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.13"
+warn_unused_configs = true
+check_untyped_defs = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pyright]
+include = ["main.py", "tests"]
+exclude = ["**/.venv"]
+pythonVersion = "3.13"
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+reportMissingImports = "warning"
+reportMissingModuleSource = false
+reportMissingTypeStubs = false
