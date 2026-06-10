@@ -23,7 +23,7 @@ def main() -> None:
     # Any covariate column beyond the required three is fed to the network as an
     # additional feature. The chosen covariates are persisted in the saved
     # predictor, so predict.py needs no matching configuration.
-    model.additional_covariates = additional_covariates(data.columns)
+    model.additional_covariates = additional_covariates(data)
     if model.additional_covariates:
         logger.info("Using additional covariates: %s", model.additional_covariates)
     predictor = model.train(data)

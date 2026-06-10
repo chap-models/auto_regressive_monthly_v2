@@ -55,22 +55,28 @@ def test_train_then_predict(tmp_path: Path) -> None:
     assert len(out) == df["location"].nunique() * PREDICTION_LENGTH
 
 
-def test_additional_covariates_helper_skips_index_target_and_required():
+def test_additional_covariates_helper_skips_index_target_required_and_chap_metadata():
     if str(REPO) not in sys.path:
         sys.path.insert(0, str(REPO))  # model.py lives at the repo root
     from model import additional_covariates
 
-    columns = [
-        "time_period",
-        "location",
-        "disease_cases",
-        "rainfall",
-        "mean_temperature",
-        "population",
-        "relative_humidity",
-        "irs_decay",
-    ]
-    assert additional_covariates(columns) == ["relative_humidity", "irs_decay"]
+    # CHAP writes an unnamed index and a string `parent` column alongside the
+    # declared covariates; only the numeric extra covariates should be selected.
+    frame = pd.DataFrame(
+        {
+            "Unnamed: 0": [0, 1],
+            "time_period": ["2020-01", "2020-02"],
+            "location": ["A", "A"],
+            "parent": ["P", "P"],
+            "disease_cases": [1.0, 2.0],
+            "rainfall": [1.0, 2.0],
+            "mean_temperature": [20.0, 21.0],
+            "population": [1000.0, 1000.0],
+            "relative_humidity": [50.0, 55.0],
+            "irs_decay": [0.1, 0.2],
+        }
+    )
+    assert additional_covariates(frame) == ["relative_humidity", "irs_decay"]
 
 
 def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:

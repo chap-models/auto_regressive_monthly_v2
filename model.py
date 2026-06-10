@@ -1,25 +1,30 @@
 """Build the configured monthly auto-regressive model."""
 
 import os
-from collections.abc import Iterable
 
+import pandas as pd
 from chap_auto_regressive import AutoRegressiveModel
 from chap_auto_regressive.transforms import REQUIRED_COVARIATES
 
-# Index and target columns that are never covariates.
-_NON_COVARIATE_COLUMNS = frozenset({"time_period", "location", "disease_cases"})
+# Index/target/identifier columns that are never covariates.
+_NON_COVARIATE_COLUMNS = frozenset({"time_period", "location", "disease_cases", "parent"})
 
 
-def additional_covariates(columns: Iterable[str]) -> list[str]:
+def additional_covariates(data: pd.DataFrame) -> list[str]:
     """Return the additional covariate columns present in a training frame.
 
-    CHAP writes the training CSV with exactly the index columns, the target, the
-    required covariates and any ``additional_continuous_covariates`` named in the
-    model configuration — so every remaining column is an additional covariate to
-    feed the network, in their given order.
+    Beyond the index, target and required covariates, CHAP includes the
+    ``additional_continuous_covariates`` named in the run config — every such
+    column is fed to the network as an extra feature, in column order. Only
+    numeric columns qualify, which skips the string ``parent``/``location``
+    identifiers and the unnamed index CHAP writes into the CSV.
     """
     skip = _NON_COVARIATE_COLUMNS | set(REQUIRED_COVARIATES)
-    return [c for c in columns if c not in skip]
+    return [
+        c
+        for c in data.columns
+        if c not in skip and not str(c).startswith("Unnamed") and pd.api.types.is_numeric_dtype(data[c])
+    ]
 
 
 def build_model() -> AutoRegressiveModel:
