@@ -4,6 +4,9 @@ required_covariates:
   - rainfall
   - mean_temperature
   - population
+# Any covariate named in a run's additional_continuous_covariates is fed to the
+# network as an extra feature (on top of the required three above).
+allow_free_additional_continuous_covariates: true
 entry_points:
   train:
     parameters:

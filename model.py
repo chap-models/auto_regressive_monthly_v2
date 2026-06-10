@@ -1,8 +1,25 @@
 """Build the configured monthly auto-regressive model."""
 
 import os
+from collections.abc import Iterable
 
 from chap_auto_regressive import AutoRegressiveModel
+from chap_auto_regressive.transforms import REQUIRED_COVARIATES
+
+# Index and target columns that are never covariates.
+_NON_COVARIATE_COLUMNS = frozenset({"time_period", "location", "disease_cases"})
+
+
+def additional_covariates(columns: Iterable[str]) -> list[str]:
+    """Return the additional covariate columns present in a training frame.
+
+    CHAP writes the training CSV with exactly the index columns, the target, the
+    required covariates and any ``additional_continuous_covariates`` named in the
+    model configuration — so every remaining column is an additional covariate to
+    feed the network, in their given order.
+    """
+    skip = _NON_COVARIATE_COLUMNS | set(REQUIRED_COVARIATES)
+    return [c for c in columns if c not in skip]
 
 
 def build_model() -> AutoRegressiveModel:

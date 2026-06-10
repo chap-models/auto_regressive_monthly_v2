@@ -5,7 +5,9 @@ description = "Monthly Deep Auto Regressive CHAP model (RNN architecture, flax/j
 license = { text = "AGPLv3 license" }
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "chap_auto_regressive @ git+https://github.com/mortenoh/chap_auto_regressive.git@main",
+    # TODO: repoint to mortenoh@main once mortenoh/chap_auto_regressive#1 (additional
+    # covariates) is merged. Pinned to the feature branch so this works in the meantime.
+    "chap_auto_regressive @ git+https://github.com/knutdrand/chap_auto_regressive.git@feat/additional-covariates",
     "pandas>=2.1",
 ]
 

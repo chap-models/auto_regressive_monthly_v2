@@ -53,3 +53,60 @@ def test_train_then_predict(tmp_path: Path) -> None:
     assert sample_cols, "no sample_* columns in the output"
     assert np.isfinite(out[sample_cols].to_numpy()).all()
     assert len(out) == df["location"].nunique() * PREDICTION_LENGTH
+
+
+def test_additional_covariates_helper_skips_index_target_and_required():
+    if str(REPO) not in sys.path:
+        sys.path.insert(0, str(REPO))  # model.py lives at the repo root
+    from model import additional_covariates
+
+    columns = [
+        "time_period",
+        "location",
+        "disease_cases",
+        "rainfall",
+        "mean_temperature",
+        "population",
+        "relative_humidity",
+        "irs_decay",
+    ]
+    assert additional_covariates(columns) == ["relative_humidity", "irs_decay"]
+
+
+def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:
+    # An extra covariate column in the data is fed to the network at train time
+    # and required at predict time (it is persisted in the saved model).
+    env = {**os.environ, "AR_N_ITER": "30"}
+    df = pd.read_csv(INPUT)
+    rng = np.random.RandomState(0)
+    df["relative_humidity"] = rng.rand(len(df)) * 100  # a derived extra covariate
+
+    data_path = tmp_path / "train_extra.csv"
+    df.to_csv(data_path, index=False)
+    model_path = tmp_path / "model.bin"
+    subprocess.run([sys.executable, "train.py", str(data_path), str(model_path)], cwd=REPO, env=env, check=True)
+
+    future = pd.concat(
+        [
+            sub.sort_values("time_period").tail(PREDICTION_LENGTH).drop(columns=["disease_cases"])
+            for _, sub in df.groupby("location", sort=False)
+        ],
+        ignore_index=True,
+    )
+    historic_path = tmp_path / "historic.csv"
+    future_path = tmp_path / "future.csv"
+    out_path = tmp_path / "predictions.csv"
+    df.to_csv(historic_path, index=False)
+    future.to_csv(future_path, index=False)
+
+    subprocess.run(
+        [sys.executable, "predict.py", str(model_path), str(historic_path), str(future_path), str(out_path)],
+        cwd=REPO,
+        env=env,
+        check=True,
+    )
+
+    out = pd.read_csv(out_path)
+    sample_cols = [c for c in out.columns if c.startswith("sample_")]
+    assert sample_cols and np.isfinite(out[sample_cols].to_numpy()).all()
+    assert len(out) == df["location"].nunique() * PREDICTION_LENGTH
