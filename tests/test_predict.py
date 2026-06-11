@@ -12,17 +12,29 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
 REPO = Path(__file__).resolve().parent.parent
 INPUT = REPO / "input" / "trainData.csv"
 PREDICTION_LENGTH = 3
 
 
+def _write_config(tmp_path: Path, **options) -> str:
+    """Write a CHAP model-configuration YAML with the given user_option_values."""
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump({"user_option_values": options}))
+    return str(path)
+
+
 def test_train_then_predict(tmp_path: Path) -> None:
     env = {**os.environ, "AR_N_ITER": "30"}  # fast pass; production default is 1000
     model_path = tmp_path / "model.bin"
+    # The bundled data is 36 months; shrink context/ensemble via the config path.
+    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1)
 
-    subprocess.run([sys.executable, "train.py", str(INPUT), str(model_path)], cwd=REPO, env=env, check=True)
+    subprocess.run(
+        [sys.executable, "train.py", str(INPUT), str(model_path), "--config", cfg], cwd=REPO, env=env, check=True
+    )
 
     # Build historic (full series) and future (last `prediction_length` periods,
     # covariates only) inputs from the bundled data.
@@ -90,7 +102,10 @@ def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:
     data_path = tmp_path / "train_extra.csv"
     df.to_csv(data_path, index=False)
     model_path = tmp_path / "model.bin"
-    subprocess.run([sys.executable, "train.py", str(data_path), str(model_path)], cwd=REPO, env=env, check=True)
+    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1)
+    subprocess.run(
+        [sys.executable, "train.py", str(data_path), str(model_path), "--config", cfg], cwd=REPO, env=env, check=True
+    )
 
     future = pd.concat(
         [
@@ -116,3 +131,15 @@ def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:
     sample_cols = [c for c in out.columns if c.startswith("sample_")]
     assert sample_cols and np.isfinite(out[sample_cols].to_numpy()).all()
     assert len(out) == df["location"].nunique() * PREDICTION_LENGTH
+
+
+def test_build_model_applies_user_options_and_ignores_unknown():
+    if str(REPO) not in sys.path:
+        sys.path.insert(0, str(REPO))  # model.py lives at the repo root
+    from model import build_model
+
+    model = build_model({"context_length": 18, "n_ensemble": 3, "cell": "simple", "bogus_option": 1})
+    assert model.context_length == 18
+    assert model.n_ensemble == 3
+    assert model.cell == "simple"  # architecture knob applied
+    assert not hasattr(model, "bogus_option")  # unknown ignored, not set

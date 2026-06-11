@@ -1,13 +1,29 @@
 """Build the configured monthly auto-regressive model."""
 
+import logging
 import os
 
 import pandas as pd
 from chap_auto_regressive import AutoRegressiveModel
 from chap_auto_regressive.transforms import REQUIRED_COVARIATES
 
+logger = logging.getLogger(__name__)
+
 # Index/target/identifier columns that are never covariates.
 _NON_COVARIATE_COLUMNS = frozenset({"time_period", "location", "disease_cases", "parent"})
+
+# Model options a run may set via user_option_values (all optional; defaults are
+# the tuned configuration baked into AutoRegressiveModel).
+MODEL_OPTIONS = (
+    "n_iter",
+    "context_length",
+    "n_ensemble",
+    "learning_rate",
+    "prediction_length",
+    "cell",
+    "rnn_features",
+    "head_features",
+)
 
 
 def additional_covariates(data: pd.DataFrame) -> list[str]:
@@ -27,15 +43,22 @@ def additional_covariates(data: pd.DataFrame) -> list[str]:
     ]
 
 
-def build_model() -> AutoRegressiveModel:
-    """Return the configured monthly model.
+def build_model(options: dict | None = None) -> AutoRegressiveModel:
+    """Return the model, applying any run ``user_option_values``.
 
-    ``AR_N_ITER`` overrides the training-iteration count (default 1000) so the
-    test suite can run a fast pass.
+    Defaults are the tuned configuration baked into ``AutoRegressiveModel`` (GRU
+    cells, 3-year context, 5-member ensemble). ``options`` (a run's
+    ``user_option_values``) override individual knobs; unknown keys are ignored
+    with a warning. ``AR_N_ITER`` still overrides the epoch count so the test
+    suite can run a fast pass.
     """
+    options = dict(options or {})
+    if "AR_N_ITER" in os.environ:
+        options["n_iter"] = int(os.environ["AR_N_ITER"])
     model = AutoRegressiveModel()
-    model.n_iter = int(os.environ.get("AR_N_ITER", "1000"))
-    model.context_length = 12
-    model.prediction_length = 3
-    model.learning_rate = 1e-5
+    for key, value in options.items():
+        if key in MODEL_OPTIONS:
+            setattr(model, key, value)
+        else:
+            logger.warning("Ignoring unknown model option: %s", key)
     return model
