@@ -23,6 +23,9 @@ MODEL_OPTIONS = (
     "cell",
     "rnn_features",
     "head_features",
+    "rnn_layers",
+    "dropout_rate",
+    "recursive_decode",
 )
 
 
