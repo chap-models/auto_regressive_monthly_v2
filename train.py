@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+from chap_auto_regressive import AutoRegressiveModel
 
 from model import additional_covariates, build_model
 
@@ -22,6 +23,32 @@ def _read_user_options(config_path: str | None) -> dict:
     return config.get("user_option_values", {}) or {}
 
 
+def _clamp_context_length(model: AutoRegressiveModel, data: pd.DataFrame) -> None:
+    """Shrink ``context_length`` so the training data yields at least one window.
+
+    Training needs ``context_length + prediction_length`` periods per window and
+    prediction needs ``context_length`` periods of history, so the largest safe
+    context is ``shortest history - prediction_length``. The clamped value is
+    persisted in the trained predictor, so predict stays consistent.
+    """
+    period_counts: list[int] = data.groupby("location")["time_period"].nunique().tolist()
+    periods = min(period_counts)
+    max_context = periods - model.prediction_length
+    if max_context < 1:
+        raise ValueError(
+            f"training data is too short: the shortest location history has {periods} periods, "
+            f"but at least prediction_length+1={model.prediction_length + 1} are needed"
+        )
+    if model.context_length > max_context:
+        logger.warning(
+            "context_length=%d exceeds the available history (%d periods); clamping to %d",
+            model.context_length,
+            periods,
+            max_context,
+        )
+        model.context_length = max_context
+
+
 def main() -> None:
     """Train the model on a CSV and save the predictor."""
     parser = argparse.ArgumentParser(description="Train the auto-regressive model")
@@ -35,6 +62,7 @@ def main() -> None:
     if options:
         logger.info("Applying model options: %s", options)
     model = build_model(options)
+    _clamp_context_length(model, data)
     # Any covariate column beyond the required three is fed to the network as an
     # additional feature. The chosen covariates are persisted in the saved
     # predictor, so predict.py needs no matching configuration.
