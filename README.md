@@ -19,6 +19,15 @@ and write CSV with pandas. The model has no chap-core dependency at runtime.
 | training iterations | 1000 |
 | learning rate | 1e-5 |
 | required covariates | rainfall, mean_temperature, population |
+| additional covariates | any `additional_continuous_covariates` from the run config |
+
+## Covariates
+
+The three required covariates (`rainfall`, `mean_temperature`, `population`) are
+always used. Any covariate named in a run's `additional_continuous_covariates`
+is passed through to the network as an extra feature on top of those three —
+`train.py` picks up every covariate column present in the training data, and the
+chosen set is stored in the saved model so `predict.py` needs no matching config.
 
 ## Environment
 

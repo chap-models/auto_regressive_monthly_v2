@@ -5,9 +5,10 @@ import logging
 
 import pandas as pd
 
-from model import build_model
+from model import additional_covariates, build_model
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -17,7 +18,15 @@ def main() -> None:
     parser.add_argument("model", help="path to write the trained model")
     args = parser.parse_args()
 
-    predictor = build_model().train(pd.read_csv(args.train_data))
+    data = pd.read_csv(args.train_data)
+    model = build_model()
+    # Any covariate column beyond the required three is fed to the network as an
+    # additional feature. The chosen covariates are persisted in the saved
+    # predictor, so predict.py needs no matching configuration.
+    model.additional_covariates = additional_covariates(data)
+    if model.additional_covariates:
+        logger.info("Using additional covariates: %s", model.additional_covariates)
+    predictor = model.train(data)
     predictor.save(args.model)
 
 
