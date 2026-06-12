@@ -29,6 +29,30 @@ is passed through to the network as an extra feature on top of those three —
 `train.py` picks up every covariate column present in the training data, and the
 chosen set is stored in the saved model so `predict.py` needs no matching config.
 
+## The `full_rich` configuration
+
+[`configs/full_rich.yaml`](configs/full_rich.yaml) is the tuned configuration that beats
+the published MSTL champion on the Rwanda disease-case dataset on **every** evaluation
+window (log-CRPS, `chap export-metrics --metric-ids crps_log1p`, n-splits 12 / n-periods 3
+/ stride 1):
+
+| window | champion (MSTL) | `full_rich` | gain |
+| --- | --- | --- | --- |
+| full dataset (2013–2026) | 0.3254 | **0.3184** | −2.1 % |
+| active-spray (truncated to last spray) | 0.3596 | **0.3330** | −7.4 % |
+
+It feeds 22 covariates — the required three plus climate, the resistance-weighted
+"failed-protection" feature (`failed_total`), the champion IRS timing features, riskmap
+statics, and geojson-derived spatial features (centroids + neighbour-mean climate) — and a
+5-member deep ensemble. The many-covariate set only wins **with regularization**
+(`dropout_rate: 0.3`, `input_dropout_rate: 0.25` feature-dropout, early stop `n_iter: 300`);
+unregularized it overfits this small, noisy data. The feature CSV is built by the scripts in
+[`scripts/data_prep/`](scripts/data_prep/).
+
+```bash
+chap evaluate --model-configuration-yaml configs/full_rich.yaml ...
+```
+
 ## Environment
 
 This model uses [uv](https://docs.astral.sh/uv/) and Python 3.13. The pinned

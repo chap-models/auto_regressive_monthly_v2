@@ -26,6 +26,7 @@ MODEL_OPTIONS = (
     "rnn_layers",
     "dropout_rate",
     "recursive_decode",
+    "input_dropout_rate",
 )
 
 
