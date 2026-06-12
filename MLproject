@@ -12,7 +12,8 @@ entry_points:
     parameters:
       train_data: str
       model: str
-    command: "python train.py {train_data} {model}"
+      model_config: str
+    command: "python train.py {train_data} {model} --config {model_config}"
   predict:
     parameters:
       model: str
@@ -23,6 +24,55 @@ entry_points:
 supported_period_type: 'month'
 min_prediction_length: 1
 max_prediction_length: 3
+# Tunable knobs, surfaced to a run's user_option_values. Defaults are the tuned
+# configuration. The architecture is persisted in the trained model, so predict
+# needs no configuration.
+user_options:
+  n_iter:
+    title: Training epochs per ensemble member
+    type: integer
+    default: 400
+  context_length:
+    title: Months of history read as context
+    type: integer
+    default: 36
+  n_ensemble:
+    title: Deep-ensemble members (seed-varied; pooled at predict time)
+    type: integer
+    default: 5
+  learning_rate:
+    title: Adam learning rate
+    type: number
+    default: 0.001
+  prediction_length:
+    title: Forecast horizon (months) the model is trained for
+    type: integer
+    default: 3
+  cell:
+    title: Recurrent cell type
+    type: string
+    enum: [gru, simple]
+    default: gru
+  rnn_features:
+    title: Hidden width of the encoder/decoder cells
+    type: integer
+    default: 16
+  head_features:
+    title: Hidden width of the output head
+    type: integer
+    default: 24
+  rnn_layers:
+    title: Number of stacked encoder/decoder RNN layers
+    type: integer
+    default: 1
+  recursive_decode:
+    title: Feed each forecast step's predicted mean back as the next step's input
+    type: boolean
+    default: false
+  dropout_rate:
+    title: Dropout probability in the preprocess stage
+    type: number
+    default: 0.2
 meta_data:
   display_name: 'Monthly Deep Auto Regressive'
   description: "An experimental deep learning model based on an RNN architecture, focusing on predictions based on auto-regressive time series data."
