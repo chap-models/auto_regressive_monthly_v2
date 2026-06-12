@@ -8,6 +8,7 @@ and writes sector_neighbours.json: {location_id: [neighbour ids...]}.
 Adjacency: two polygons are neighbours if their boundaries share an edge,
 detected as >=2 shared (rounded) vertices. No shapely dependency.
 """
+
 import json
 from collections import defaultdict
 
@@ -48,6 +49,7 @@ def centroid(geom):
 
 
 def main():
+    """Compute centroids and the edge-adjacency neighbour graph, then write outputs."""
     d = json.load(open(GEO))
     feats = d["features"]
     ids = [f["id"] for f in feats]
@@ -77,8 +79,7 @@ def main():
             nbrs[b].append(a)
 
     # write neighbour graph
-    json.dump({i: nbrs.get(i, []) for i in ids},
-              open("/Users/knutdr/Data/CH/sector_neighbours.json", "w"))
+    json.dump({i: nbrs.get(i, []) for i in ids}, open("/Users/knutdr/Data/CH/sector_neighbours.json", "w"))
 
     # write centroid/degree table
     with open("/Users/knutdr/Data/CH/sector_spatial.csv", "w") as fh:
@@ -89,8 +90,9 @@ def main():
 
     degs = [len(nbrs.get(i, [])) for i in ids]
     iso = sum(1 for x in degs if x == 0)
-    print(f"{len(ids)} units; degree min/mean/max = "
-          f"{min(degs)}/{sum(degs)/len(degs):.1f}/{max(degs)}; isolated={iso}")
+    print(
+        f"{len(ids)} units; degree min/mean/max = {min(degs)}/{sum(degs) / len(degs):.1f}/{max(degs)}; isolated={iso}"
+    )
 
 
 if __name__ == "__main__":

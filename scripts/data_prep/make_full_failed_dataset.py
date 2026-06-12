@@ -12,6 +12,7 @@ Writes two CSVs:
   spray_ar_full_rich.csv    -- the above + champion IRS timing features + riskmap statics
                                + spatial (centroids, neighbour-mean climate)
 """
+
 import csv
 import json
 from collections import defaultdict
@@ -29,14 +30,31 @@ CLASS_MORT = {  # insecticide class -> resistance mortality column
     "clothianidin": "mort_clothianidin",
 }
 CLIMATE = ["rainfall", "mean_temperature", "relative_humidity"]
-CHAMP_IRS = ["irs_level", "irs_since", "irs_cumulative", "irs_decay2", "irs_decay8",
-             "irs_recent3", "irs_recent6", "irs_recent12", "irs_rounds12"]
+CHAMP_IRS = [
+    "irs_level",
+    "irs_since",
+    "irs_cumulative",
+    "irs_decay2",
+    "irs_decay8",
+    "irs_recent3",
+    "irs_recent6",
+    "irs_recent12",
+    "irs_rounds12",
+]
 RISK_COLS = ["sig_temp", "focal_habitat", "focal_builtup", "env3d_risk_oof"]
-KEEP_BASE = ["time_period", "location", "disease_cases", "rainfall",
-             "mean_temperature", "population", "relative_humidity"]
+KEEP_BASE = [
+    "time_period",
+    "location",
+    "disease_cases",
+    "rainfall",
+    "mean_temperature",
+    "population",
+    "relative_humidity",
+]
 
 
 def num(v):
+    """Parse v as a float, returning None for NaN or unparseable values."""
     try:
         x = float(v)
         return None if x != x else x
@@ -45,6 +63,7 @@ def num(v):
 
 
 def main():
+    """Build and write the failed-only and rich full-timeline datasets."""
     with open(BASE) as f:
         rows = list(csv.DictReader(f))
 
@@ -52,9 +71,7 @@ def main():
     res = {}
     with open(RES) as f:
         for r in csv.DictReader(f):
-            res[(r["location_id"], r["time"])] = {
-                cls: num(r.get(col)) for cls, col in CLASS_MORT.items()
-            }
+            res[(r["location_id"], r["time"])] = {cls: num(r.get(col)) for cls, col in CLASS_MORT.items()}
 
     # failed_total per row
     for r in rows:
@@ -112,7 +129,6 @@ def main():
     # --- write rich dataset ---
     spat_cols = ["centroid_lon", "centroid_lat"] + [f"nbr_{c}" for c in CLIMATE]
     cols_rich = KEEP_BASE + ["failed_total"] + CHAMP_IRS + RISK_COLS + spat_cols
-    miss = 0
     with open("/Users/knutdr/Data/CH/spray_ar_full_rich.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols_rich, extrasaction="ignore")
         w.writeheader()
