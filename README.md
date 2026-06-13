@@ -5,7 +5,7 @@ based on an RNN architecture that forecasts disease cases from auto-regressive
 time series data and climate covariates.
 
 It wraps `AutoRegressiveModel` from
-[`chap_auto_regressive`](https://github.com/mortenoh/chap_auto_regressive) and exposes the standard CHAP
+[`chap_auto_regressive`](https://github.com/chap-models/chap_auto_regressive) and exposes the standard CHAP
 `train` / `predict` commands via small `train.py` / `predict.py` scripts that read
 and write CSV with pandas. The model has no chap-core dependency at runtime.
 
@@ -63,7 +63,7 @@ environment creation deterministic and fast.
 Key pins:
 
 - Python 3.13
-- `chap_auto_regressive` @ git (mortenoh/chap_auto_regressive) — the deep AR flax model, providing `AutoRegressiveModel`
+- `chap_auto_regressive` @ git (chap-models/chap_auto_regressive) — the deep AR flax model, providing `AutoRegressiveModel`
 - `flax 0.12`, `jax 0.10` (resolved transitively via `chap_auto_regressive`)
 
 The number of training iterations defaults to **1000**. Set the `AR_N_ITER`
@@ -110,7 +110,7 @@ From a chap-core checkout (for the example dataset):
 
 ```bash
 uv run chap eval \
-    --model-name https://github.com/mortenoh/auto_regressive_monthly \
+    --model-name https://github.com/chap-models/auto_regressive_monthly_v2 \
     --dataset-csv example_data/laos_subset.csv \
     --output-file /tmp/chap/ar_eval.nc \
     --backtest-params.n-splits 2 \
