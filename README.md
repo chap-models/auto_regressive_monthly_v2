@@ -25,9 +25,10 @@ and write CSV with pandas. The model has no chap-core dependency at runtime.
 
 The three required covariates (`rainfall`, `mean_temperature`, `population`) are
 always used. Any covariate named in a run's `additional_continuous_covariates`
-is passed through to the network as an extra feature on top of those three —
-`train.py` picks up every covariate column present in the training data, and the
-chosen set is stored in the saved model so `predict.py` needs no matching config.
+is passed through to the network as an extra feature on top of those three.
+Other columns in the training data are ignored, even though CHAP writes every
+dataset column into the CSV it hands to `train.py`. The chosen set is stored in
+the saved model so `predict.py` needs no matching config.
 
 ## The `full_rich` configuration
 

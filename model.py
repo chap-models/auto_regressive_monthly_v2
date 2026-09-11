@@ -3,14 +3,9 @@
 import logging
 import os
 
-import pandas as pd
 from chap_auto_regressive import AutoRegressiveModel
-from chap_auto_regressive.transforms import REQUIRED_COVARIATES
 
 logger = logging.getLogger(__name__)
-
-# Index/target/identifier columns that are never covariates.
-_NON_COVARIATE_COLUMNS = frozenset({"time_period", "location", "disease_cases", "parent"})
 
 # Model options a run may set via user_option_values (all optional; defaults are
 # the tuned configuration baked into AutoRegressiveModel).
@@ -28,23 +23,6 @@ MODEL_OPTIONS = (
     "recursive_decode",
     "input_dropout_rate",
 )
-
-
-def additional_covariates(data: pd.DataFrame) -> list[str]:
-    """Return the additional covariate columns present in a training frame.
-
-    Beyond the index, target and required covariates, CHAP includes the
-    ``additional_continuous_covariates`` named in the run config — every such
-    column is fed to the network as an extra feature, in column order. Only
-    numeric columns qualify, which skips the string ``parent``/``location``
-    identifiers and the unnamed index CHAP writes into the CSV.
-    """
-    skip = _NON_COVARIATE_COLUMNS | set(REQUIRED_COVARIATES)
-    return [
-        c
-        for c in data.columns
-        if c not in skip and not str(c).startswith("Unnamed") and pd.api.types.is_numeric_dtype(data[c])
-    ]
 
 
 def build_model(options: dict | None = None) -> AutoRegressiveModel:
