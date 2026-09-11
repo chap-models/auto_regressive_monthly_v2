@@ -21,6 +21,8 @@ MODEL_OPTIONS = (
     "validation_periods",
     "patience",
     "eval_every",
+    "min_probe_windows",
+    "refit_scaling",
     "context_length",
     "n_ensemble",
     "learning_rate",
