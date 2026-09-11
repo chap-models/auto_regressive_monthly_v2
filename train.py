@@ -8,19 +8,18 @@ import pandas as pd
 import yaml
 from chap_auto_regressive import AutoRegressiveModel
 
-from model import additional_covariates, build_model
+from model import build_model
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def _read_user_options(config_path: str | None) -> dict:
-    """Read ``user_option_values`` from a CHAP model-configuration YAML, if given."""
+def _read_config(config_path: str | None) -> dict:
+    """Read a CHAP model-configuration YAML, if given."""
     if not config_path or not Path(config_path).exists():
         return {}
     with open(config_path) as f:
-        config = yaml.safe_load(f) or {}
-    return config.get("user_option_values", {}) or {}
+        return yaml.safe_load(f) or {}
 
 
 def _clamp_context_length(model: AutoRegressiveModel, data: pd.DataFrame) -> None:
@@ -58,15 +57,18 @@ def main() -> None:
     args = parser.parse_args()
 
     data = pd.read_csv(args.train_data)
-    options = _read_user_options(args.config)
+    config = _read_config(args.config)
+    options = config.get("user_option_values") or {}
     if options:
         logger.info("Applying model options: %s", options)
     model = build_model(options)
     _clamp_context_length(model, data)
-    # Any covariate column beyond the required three is fed to the network as an
-    # additional feature. The chosen covariates are persisted in the saved
-    # predictor, so predict.py needs no matching configuration.
-    model.additional_covariates = additional_covariates(data)
+    # Only the covariates the configuration declares are fed to the network on
+    # top of the required three. CHAP writes every dataset column into the
+    # training CSV, so the columns present do not decide what is used. The chosen
+    # covariates are persisted in the saved predictor, so predict.py needs no
+    # matching configuration.
+    model.additional_covariates = list(config.get("additional_continuous_covariates") or [])
     if model.additional_covariates:
         logger.info("Using additional covariates: %s", model.additional_covariates)
     predictor = model.train(data)
