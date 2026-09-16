@@ -37,9 +37,9 @@ user_options:
     type: integer
     default: 0
   early_stopping:
-    title: Stop each member at its best validation epoch, then refit on all data
+    title: Stop each member at its best validation epoch, then refit on all data (needs a long series; see validation_periods)
     type: boolean
-    default: true
+    default: false
   validation_periods:
     title: Trailing periods held out to pick the stopping epoch
     type: integer
