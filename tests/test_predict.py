@@ -108,7 +108,9 @@ def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:
     rng = np.random.RandomState(0)
     df["relative_humidity"] = rng.rand(len(df)) * 100  # a derived extra covariate
 
-    cfg = _write_config(tmp_path, covariates=["relative_humidity"], context_length=12, n_ensemble=1, early_stopping=False)
+    cfg = _write_config(
+        tmp_path, covariates=["relative_humidity"], context_length=12, n_ensemble=1, early_stopping=False
+    )
     out = _train_and_predict(tmp_path, df, df, cfg)
 
     sample_cols = [c for c in out.columns if c.startswith("sample_")]
