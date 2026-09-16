@@ -32,6 +32,26 @@ user_options:
     title: Training epochs per ensemble member
     type: integer
     default: 400
+  seed_offset:
+    title: Offset added to every ensemble member's seed (for repeat runs)
+    type: integer
+    default: 0
+  early_stopping:
+    title: Stop each member at its best validation epoch, then refit on all data
+    type: boolean
+    default: true
+  validation_periods:
+    title: Trailing periods held out to pick the stopping epoch
+    type: integer
+    default: 24
+  patience:
+    title: Evaluations without improvement before stopping
+    type: integer
+    default: 6
+  eval_every:
+    title: Epochs between validation evaluations
+    type: integer
+    default: 5
   context_length:
     title: Months of history read as context
     type: integer

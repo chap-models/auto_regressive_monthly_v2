@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 # the tuned configuration baked into AutoRegressiveModel).
 MODEL_OPTIONS = (
     "n_iter",
+    "seed_offset",
+    "early_stopping",
+    "validation_periods",
+    "patience",
+    "eval_every",
+    "min_probe_windows",
+    "refit_scaling",
     "context_length",
     "n_ensemble",
     "learning_rate",
