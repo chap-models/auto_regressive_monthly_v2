@@ -64,7 +64,7 @@ def test_train_then_predict(tmp_path: Path) -> None:
     env = {**os.environ, "AR_N_ITER": "30"}  # fast pass; production default is 1000
     model_path = tmp_path / "model.bin"
     # The bundled data is 36 months; shrink context/ensemble via the config path.
-    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1, early_stopping=False)
+    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1)
 
     subprocess.run(
         [sys.executable, "train.py", str(INPUT), str(model_path), "--config", cfg], cwd=REPO, env=env, check=True
@@ -108,9 +108,7 @@ def test_train_then_predict_with_additional_covariate(tmp_path: Path) -> None:
     rng = np.random.RandomState(0)
     df["relative_humidity"] = rng.rand(len(df)) * 100  # a derived extra covariate
 
-    cfg = _write_config(
-        tmp_path, covariates=["relative_humidity"], context_length=12, n_ensemble=1, early_stopping=False
-    )
+    cfg = _write_config(tmp_path, covariates=["relative_humidity"], context_length=12, n_ensemble=1)
     out = _train_and_predict(tmp_path, df, df, cfg)
 
     sample_cols = [c for c in out.columns if c.startswith("sample_")]
@@ -125,7 +123,7 @@ def test_undeclared_covariate_column_is_not_used(tmp_path: Path) -> None:
     df = pd.read_csv(INPUT)
     train_df = df.assign(relative_humidity=np.random.RandomState(0).rand(len(df)) * 100)
 
-    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1, early_stopping=False)
+    cfg = _write_config(tmp_path, context_length=12, n_ensemble=1)
     out = _train_and_predict(tmp_path, train_df, df, cfg)
 
     sample_cols = [c for c in out.columns if c.startswith("sample_")]

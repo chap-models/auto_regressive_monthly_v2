@@ -45,6 +45,10 @@ def build_model(options: dict | None = None) -> AutoRegressiveModel:
     if "AR_N_ITER" in os.environ:
         options["n_iter"] = int(os.environ["AR_N_ITER"])
     model = AutoRegressiveModel()
+    # Early stopping is opt-in. It holds out a trailing validation block and needs
+    # a long series (the library raises when the history is too short), so a run
+    # must ask for it explicitly rather than inherit it from the library default.
+    model.early_stopping = False
     for key, value in options.items():
         if key in MODEL_OPTIONS:
             setattr(model, key, value)
