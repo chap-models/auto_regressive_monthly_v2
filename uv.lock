@@ -87,7 +87,7 @@ dev = [
 [[package]]
 name = "chap-auto-regressive"
 version = "1.0.0"
-source = { git = "https://github.com/chap-models/chap_auto_regressive.git?rev=main#4387deabc28cf9de2b60be42656a75b207379c5c" }
+source = { git = "https://github.com/chap-models/chap_auto_regressive.git?rev=main#6d850cee36847ba1840ce8f5ff86eb311fcf566a" }
 dependencies = [
     { name = "flax" },
     { name = "jax" },
