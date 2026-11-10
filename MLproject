@@ -43,7 +43,16 @@ user_options:
   validation_periods:
     title: Trailing periods held out to pick the stopping epoch
     type: integer
-    default: 24
+    default: 12
+  min_probe_windows:
+    title: Training windows the early-stopping probe needs before the held-out block
+    type: integer
+    default: 5
+  refit_scaling:
+    title: How the probe's stopping point carries over to the full refit
+    type: string
+    enum: [epochs, steps]
+    default: epochs
   patience:
     title: Evaluations without improvement before stopping
     type: integer
@@ -93,6 +102,10 @@ user_options:
     title: Dropout probability in the preprocess stage
     type: number
     default: 0.2
+  input_dropout_rate:
+    title: Feature-dropout probability on the input covariates
+    type: number
+    default: 0.0
 meta_data:
   display_name: 'Monthly Deep Auto Regressive v2 (experimental)'
   description: "An experimental deep learning model based on an RNN architecture, focusing on predictions based on auto-regressive time series data."
